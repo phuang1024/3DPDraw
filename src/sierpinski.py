@@ -19,7 +19,7 @@ def generate_tri(base, size, depth):
 
 
 def main():
-    parser = create_parser()
+    parser = create_parser("Draw sierpinski triangle.")
     parser.add_argument("--size", type=float, default=200, help="Side length in mm.")
     parser.add_argument("-d", "--depth", type=int, default=5, help="Depth of recursion.")
     args = parser.parse_args()

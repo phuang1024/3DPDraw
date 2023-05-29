@@ -5,13 +5,14 @@ __all__ = (
 
 import argparse
 import math
+import sys
 
 
-def create_parser():
+def create_parser(desc=""):
     """
     Create default parser.
     """
-    parser = argparse.ArgumentParser(description="Line segments to gcode")
+    parser = argparse.ArgumentParser(description="")
     parser.add_argument("--ox", type=float, default=0, help="Additive offset X.")
     parser.add_argument("--oy", type=float, default=0, help="Additive offset Y.")
     parser.add_argument("--oz", type=float, default=0, help="Additive offset Z.")
@@ -55,11 +56,11 @@ def lines_to_gcode(args, lines):
         curr_y = y2
         is_first_iter = False
 
-    print("G28 ; Home", flush=True)
+    sys.stdout.flush()
 
 
 def main():
-    parser = create_parser()
+    parser = create_parser("Line segments to GCode.")
     args = parser.parse_args()
 
     lines = []
