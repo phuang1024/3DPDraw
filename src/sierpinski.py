@@ -1,8 +1,4 @@
-import argparse
-import sys
-from subprocess import Popen, PIPE
-
-PY = sys.executable
+from convert import *
 
 
 def generate_tri(base, size, depth):
@@ -23,31 +19,25 @@ def generate_tri(base, size, depth):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("output", help="Output gcode file.")
-    parser.add_argument("--ox", type=float, default=0, help="Offset x.")
-    parser.add_argument("--oy", type=float, default=0, help="Offset y.")
-    parser.add_argument("-s", "--size", type=float, default=200, help="Side length in mm.")
+    parser = create_parser()
+    parser.add_argument("--size", type=float, default=200, help="Side length in mm.")
     parser.add_argument("-d", "--depth", type=int, default=5, help="Depth of recursion.")
     args = parser.parse_args()
 
-    with open(args.output, "wb") as f:
-        proc = Popen([PY, "convert.py", "--ox", str(args.ox), "--oy", str(args.oy)], stdin=PIPE, stdout=f)
+    height = args.size * 3**0.5 / 2
 
-        # Draw initial triangle
-        height = args.size * 3**0.5 / 2
-        proc.stdin.write(f"0 0 {args.size} 0\n".encode())
-        proc.stdin.write(f"{args.size} 0 {args.size/2} {height}\n".encode())
-        proc.stdin.write(f"{args.size/2} {height} 0 0\n".encode())
+    # Initial triangle
+    lines = [
+        (0, 0, args.size, 0),
+        (args.size, 0, args.size/2, height),
+        (args.size/2, height, 0, 0),
+    ]
 
-        # Draw the rest
-        for line in generate_tri((args.size/2, 0), args.size/2, args.depth-1):
-            proc.stdin.write(" ".join(map(str, line)).encode())
-            proc.stdin.write("\n".encode())
+    # Rest of the triangles
+    for line in generate_tri((args.size/2, 0), args.size/2, args.depth-1):
+        lines.append(line)
 
-        proc.stdin.flush()
-        proc.stdin.close()
-        proc.wait()
+    lines_to_gcode(args, lines)
 
 
 if __name__ == "__main__":
