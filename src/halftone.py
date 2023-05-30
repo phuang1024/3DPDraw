@@ -1,4 +1,5 @@
 import math
+import sys
 
 import cv2
 import numpy as np
@@ -8,7 +9,7 @@ from convert import *
 
 def generate_dots(args, angle, size):
     """
-    Yields (x, y) positions of dots.
+    Yields (x, y) mm positions of dots.
     """
     # First generate points as if angle = 0
     points = []
@@ -73,17 +74,24 @@ def main():
     image = cv2.imread(args.image)
     image = image.astype(np.float32) / 255
     image = np.mean(image, axis=2)
+    image = image[::-1, :]
+    image = np.interp(image, [np.min(image), np.max(image)], [0, 1])
 
     angle = math.radians(args.angle % 60)
     size = (args.size, args.size / image.shape[1] * image.shape[0])
 
     lines = []
+    mm_to_px = image.shape[1] / args.size
     for x, y in generate_dots(args, angle, size):
         # Get average of this region
-        x0 = int(x - args.spacing/2)
-        x1 = int(x + args.spacing/2)
-        y0 = int(y - args.spacing/2)
-        y1 = int(y + args.spacing/2)
+        region_size = args.spacing / 2 * mm_to_px
+        px_x = x * mm_to_px
+        px_y = y * mm_to_px
+        x0 = int(px_x - region_size)
+        x1 = int(px_x + region_size)
+        y0 = int(px_y - region_size)
+        y1 = int(px_y + region_size)
+        print(x0, x1, y0, y1, file=sys.stderr)
         region = image[y0:y1, x0:x1]
         if region.size == 0:
             continue
