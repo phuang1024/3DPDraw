@@ -1,5 +1,4 @@
 import math
-import sys
 
 import cv2
 import numpy as np
@@ -91,7 +90,6 @@ def main():
         x1 = int(px_x + region_size)
         y0 = int(px_y - region_size)
         y1 = int(px_y + region_size)
-        print(x0, x1, y0, y1, file=sys.stderr)
         region = image[y0:y1, x0:x1]
         if region.size == 0:
             continue
